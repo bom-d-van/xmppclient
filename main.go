@@ -155,7 +155,7 @@ type Config struct {
 	// during the connection.
 	Log io.Writer
 
-	RequireTLS bool
+	TLSRequired bool
 }
 
 // Dial creates a new connection to an XMPP server and authenticates as the
@@ -176,7 +176,7 @@ func Dial(address, user, domain, password string, config *Config) (c *Conn, err 
 		return nil, err
 	}
 
-	if config.RequireTLS {
+	if config.TLSRequired {
 		tlsConn, err := startTLSNegotiation(c, domain, log, config)
 		if err != nil {
 			return nil, err
