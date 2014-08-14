@@ -1,6 +1,9 @@
 package xmppclient
 
 import (
+	"crypto/rand"
+	"encoding/binary"
+
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/base64"
@@ -94,7 +97,7 @@ func Dial(address, user, domain, password string, config *Config) (c *Conn, err 
 	}
 
 	// Send IQ message asking to bind to the local user name.
-	fmt.Fprintf(c.out, "<iq type='set' id='bind_1'><bind xmlns='%s'/></iq>", nsBind)
+	fmt.Fprintf(c.out, "<iq type='set' id='%s'><bind xmlns='%s'/></iq>", c.getId(), nsBind)
 	var iq ClientIQ
 	if err = c.in.DecodeElement(&iq, nil); err != nil {
 		return nil, errors.New("unmarshal <iq>: " + err.Error())
@@ -115,7 +118,7 @@ func Dial(address, user, domain, password string, config *Config) (c *Conn, err 
 	if features.Session != nil {
 		// The server needs a session to be established. See RFC 3921,
 		// section 3.
-		fmt.Fprintf(c.out, "<iq to='%s' type='set' id='sess_1'><session xmlns='%s'/></iq>", domain, nsSession)
+		fmt.Fprintf(c.out, "<iq to='%s' type='set' id='%s'><session xmlns='%s'/></iq>", domain, c.getId(), nsSession)
 		if err = c.in.DecodeElement(&iq, nil); err != nil {
 			return nil, errors.New("xmpp: unmarshal <iq>: " + err.Error())
 		}
@@ -246,6 +249,14 @@ func certName(cert *x509.Certificate) string {
 		ret += "CN=" + name.CommonName + "/"
 	}
 	return ret
+}
+
+func (c *Conn) getId() uint64 {
+	var buf [8]byte
+	if _, err := rand.Reader.Read(buf[:]); err != nil {
+		panic("Failed to read random bytes: " + err.Error())
+	}
+	return binary.LittleEndian.Uint64(buf[:])
 }
 
 // rfc3920 section 5.2
@@ -384,6 +395,11 @@ func (c *Conn) SendDirectMucInvitation(to string, roomJid string, reason string)
 
 func (c *Conn) SignalPresence(state string) error {
 	_, err := fmt.Fprintf(c.out, "<presence><show>%s</show></presence>", xmlEscape(state))
+	return err
+}
+
+func (c *Conn) SetOffLine() error {
+	_, err := fmt.Fprintf(c.out, `<presence type="unavailable"><show>0</show></presence>`)
 	return err
 }
 

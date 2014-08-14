@@ -1,5 +1,7 @@
 package xmppclient
 
+import "fmt"
+
 type Handler interface {
 	RecvMsg(msg *ClientMessage)
 	RecvPresence(pres *ClientPresence)
@@ -7,5 +9,10 @@ type Handler interface {
 
 type BasicHandler struct{}
 
-func (b *BasicHandler) RecvMsg(msg *ClientMessage)        {}
-func (b *BasicHandler) RecvPresence(pres *ClientPresence) {}
+func (b *BasicHandler) RecvMsg(msg *ClientMessage) {
+	fmt.Println(msg)
+	return
+}
+
+func (b *BasicHandler) RecvPresence(pres *ClientPresence) {
+}
