@@ -23,8 +23,13 @@ const (
 )
 
 func (c *Conn) CreateRoom(jid string) {
+
 }
 
+// <presence from='hag66@shakespeare.lit/pda'
+//     to='hoho@conference.shakespeare.lit/nickname'>
+//     <x xmlns='http://jabber.org/protocol/muc'/>
+// </presence>
 func (c *Conn) JoinMUC(jid string, nickname string) error {
 	_, err := fmt.Fprintf(c.out, "<presence from='%s' to='%s/%s'>%s</presence>", c.Jid, jid, nickname, xmlnsMuc)
 	return err
@@ -34,6 +39,33 @@ func (c *Conn) DestroyRoom(jid string) error {
 	_, err := fmt.Fprintf(c.out, "<iq from='%s' id='%x' to='%s' type='set'><query xmlns='%s'><destroy jid='%s'></destroy></query></iq>",
 		c.Jid, c.getId(), jid, xmlnsMucAdmin, jid)
 	return err
+}
+
+// <iq from='hag66@shakespeare.lit/pda'
+//     id='zb8q41f4'
+//     to='chat.shakespeare.lit'
+//     type='get'>
+//   <query xmlns='http://jabber.org/protocol/disco#items'/>
+// </iq>
+func (c *Conn) DiscoverRooms() {
+	fmt.Fprintf(
+		c.out,
+		"<iq type='get' from='%s' to='conference.localhost'><query xmlns='http://jabber.org/protocol/disco#items'/></iq>",
+		c.escapedJid,
+		// c.escapedDomain,
+	)
+
+	for {
+		// token, err2 := c.in.Token()
+		// fmt.Printf("%+v\n", token)
+		// fmt.Printf("%+v\n", err2)
+
+		iq := ClientIQ{}
+		if err := c.in.DecodeElement(&iq, nil); err != nil {
+			fmt.Printf("error %+v\n", err)
+		}
+		fmt.Printf("Query: %+v\n", string(iq.Query))
+	}
 }
 
 func (c *Conn) SetRole(roomJid, jid string, role int) error {
