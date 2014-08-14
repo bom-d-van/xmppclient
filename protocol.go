@@ -12,8 +12,14 @@ const (
 	nsSASL    = "urn:ietf:params:xml:ns:xmpp-sasl"
 	nsBind    = "urn:ietf:params:xml:ns:xmpp-bind"
 	nsSession = "urn:ietf:params:xml:ns:xmpp-session"
-	nsClient  = "jabber:client"
-	nsMucUser = "http://jabber.org/protocol/muc#user"
+
+	nsClient     = "jabber:client"
+	nsConference = "jabber:x:conference"
+
+	nsMuc      = "http://jabber.org/protocol/muc"
+	nsMucUser  = "http://jabber.org/protocol/muc#user"
+	nsMucOwner = "http://jabber.org/protocol/muc#owner"
+	nsMucAdmin = "http://jabber.org/protocol/muc#admin"
 )
 
 // Stanza represents a message from the XMPP server.

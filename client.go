@@ -381,18 +381,6 @@ func (c *Conn) SendActive(to string) error {
 	return err
 }
 
-func (c *Conn) SendDirectMucInvitation(to string, roomJid string, reason string) error {
-	_, err := fmt.Fprintf(
-		c.out,
-		"<message to='%s' from='%s'><x xmlns='jabber:x:conference' jid='%s' reason='%s'/></message>",
-		xmlEscape(to),
-		xmlEscape(c.Jid),
-		xmlEscape(roomJid),
-		reason,
-	)
-	return err
-}
-
 func (c *Conn) SignalPresence(state string) error {
 	_, err := fmt.Fprintf(c.out, "<presence><show>%s</show></presence>", xmlEscape(state))
 	return err
@@ -429,7 +417,6 @@ joined:
 	)
 	return
 }
-
 
 func (c *Conn) Close() (err error) {
 	return c.xConn.Close()
