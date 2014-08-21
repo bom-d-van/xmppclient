@@ -10,9 +10,12 @@ import (
 func main() {
 	conn, err := xmppclient.Dial(
 		"localhost:5222",
-		"yeerkunth-theplant@localhost",
+		//"yeerkunth-theplant@localhost",
+		"y21@localhost",
 		"localhost",
-		"BPwOQnLGnJ",
+		//"BPwOQnLGnJ",
+		"nopassword",
+		"", //let server generate the resource
 		&xmppclient.Config{
 			Log: os.Stderr,
 			// Log:    logutils.ToWriter(logger),
@@ -29,13 +32,14 @@ func main() {
 	// conn.Message = make(chan *xmppclient.ClientMessage)
 	conn.SignalPresence("1")
 	//conn.Send("enn.raven-theplant@localhost", "I came from the darkness")
+	conn.Send("y21@localhost", "I came from the darkness")
 
 	//conn.JoinMUC("49qniykfbt9@conference.localhost", "y")
 	//conn.SendGroupChatMessage("49qniykfbt9@conference.localhost", "I came from the darkness")
 
 	//conn.SendMediatedMucInvitation("enn.raven-theplant@localhost", "49qniykfbt9@conference.localhost", "noreason")
-	conn.JoinMUC("bullshit@conference.localhost", "y")
-	conn.SendMediatedMucInvitation("enn.raven-theplant@localhost", "bullshit@conference.localhost", "noreason")
+	//conn.JoinMUC("bullshit@conference.localhost", "y")
+	//conn.SendMediatedMucInvitation("enn.raven-theplant@localhost", "bullshit@conference.localhost", "noreason")
 	//conn.SendDirectMucInvitation("enn.raven-theplant@localhost", "bullshit@conference.localhost", "noreason")
 
 	conn.Handler = &xmppclient.BasicHandler{}

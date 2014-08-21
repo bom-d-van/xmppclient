@@ -48,7 +48,7 @@ type Config struct {
 
 // Dial creates a new connection to an XMPP server and authenticates as the
 // given user.
-func Dial(address, user, domain, password string, config *Config) (c *Conn, err error) {
+func Dial(address, user, domain, password, resource string, config *Config) (c *Conn, err error) {
 	c = new(Conn)
 
 	var log io.Writer
@@ -97,7 +97,25 @@ func Dial(address, user, domain, password string, config *Config) (c *Conn, err 
 	}
 
 	// Send IQ message asking to bind to the local user name.
-	fmt.Fprintf(c.out, "<iq type='set' id='%s'><bind xmlns='%s'/></iq>", c.getId(), nsBind)
+	if resource == "" {
+		fmt.Fprintf(c.out, "<iq type='set' id='%s'><bind xmlns='%s'/></iq>", c.getId(), nsBind)
+	} else {
+		// rfc3920 Resource Binding
+		// http://xmpp.org/rfcs/rfc3920.html#bind
+		//<iq type='set' id='bind_2'>
+		//  <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>
+		//    <resource>someresource</resource>
+		//  </bind>
+		//</iq>
+		fmt.Fprintf(
+			c.out,
+			"<iq type='set' id='%s'><bind xmlns='%s'><resource>%s</resource></bind></iq>",
+			c.getId(),
+			nsBind,
+			xmlEscape(resource),
+		)
+	}
+
 	var iq ClientIQ
 	if err = c.in.DecodeElement(&iq, nil); err != nil {
 		return nil, errors.New("unmarshal <iq>: " + err.Error())
