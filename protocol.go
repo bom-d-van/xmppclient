@@ -13,8 +13,10 @@ const (
 	nsBind    = "urn:ietf:params:xml:ns:xmpp-bind"
 	nsSession = "urn:ietf:params:xml:ns:xmpp-session"
 
-	nsClient     = "jabber:client"
+	nsClient = "jabber:client"
+
 	nsConference = "jabber:x:conference"
+	nsRoster     = "jabber:iq:roster"
 
 	nsMuc      = "http://jabber.org/protocol/muc"
 	nsMucUser  = "http://jabber.org/protocol/muc#user"

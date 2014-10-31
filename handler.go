@@ -15,4 +15,6 @@ func (b *BasicHandler) RecvMsg(msg *ClientMessage) {
 }
 
 func (b *BasicHandler) RecvPresence(pres *ClientPresence) {
+	fmt.Println(pres)
+	return
 }

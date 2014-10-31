@@ -3,6 +3,7 @@ package xmppclient
 import (
 	"crypto/rand"
 	"encoding/binary"
+	"log"
 
 	"crypto/tls"
 	"crypto/x509"
@@ -29,6 +30,7 @@ type Conn struct {
 
 	OnlineRoster []string
 	Handler      Handler
+	RosterIQMap  map[string]chan *ClientIQ
 }
 
 // Config contains options for an XMPP connection.
@@ -50,6 +52,8 @@ type Config struct {
 // given user.
 func Dial(address, user, domain, password, resource string, config *Config) (c *Conn, err error) {
 	c = new(Conn)
+
+	c.RosterIQMap = make(map[string]chan *ClientIQ)
 
 	var log io.Writer
 	if config != nil && config.Log != nil {
@@ -351,6 +355,13 @@ func (c *Conn) Listen() {
 			if c.Handler != nil {
 				c.Handler.RecvMsg(stanza.Value.(*ClientMessage))
 			}
+		case "iq":
+			if c.Handler != nil {
+				iq := stanza.Value.(*ClientIQ)
+				if ch, ok := c.RosterIQMap[iq.Id]; ok {
+					ch <- iq
+				}
+			}
 		}
 	}
 }
@@ -438,4 +449,30 @@ joined:
 
 func (c *Conn) Close() (err error) {
 	return c.xConn.Close()
+}
+
+// rfc6121
+// http://www.rfc-editor.org/rfc/rfc6121.txt
+//<iq from='juliet@example.com/balcony'
+//  id='bv1bs71f'
+//  type='get'>
+//    <query xmlns='jabber:iq:roster'/>
+//</iq>
+func (c *Conn) RetrieveRoster() (err error) {
+	id := c.getId()
+	_, err = fmt.Fprintf(
+		c.out,
+		"<iq from='%s' id='%d' type='get'><query xmlns='%s'></query></iq>",
+		//"<iq from='%s' id='%d' type='get'><query xmlns='%s'/></iq>",
+		xmlEscape(c.Jid),
+		//c.getId(),
+		id,
+		nsRoster,
+	)
+	idStr := fmt.Sprintf("%d", id)
+	c.RosterIQMap[idStr] = make(chan *ClientIQ)
+	iq := <-c.RosterIQMap[idStr]
+	log.Println(iq)
+	//TODO paser the roster items
+	return
 }
